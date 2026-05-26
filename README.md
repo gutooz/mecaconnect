@@ -172,7 +172,3 @@ Variáveis de ambiente necessárias:
 ## Licença
 
 Proprietária — © 2026 MecaConnect.
-
----
-
-> Desenvolvido com assistência de [Claude](https://claude.ai) — Anthropic AI.
