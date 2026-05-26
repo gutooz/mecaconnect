@@ -1,0 +1,32 @@
+{
+  "name": "MecaConnect — Oficina Digital",
+  "short_name": "MecaConnect",
+  "description": "Sistema inteligente para oficinas mecânicas",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#020a1c",
+  "theme_color": "#1e9cff",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nova OS",
+      "short_name": "Nova OS",
+      "url": "/os/nova",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Clientes",
+      "short_name": "Clientes",
+      "url": "/clientes",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    }
+  ]
+}

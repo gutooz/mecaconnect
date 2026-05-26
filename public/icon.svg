@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="silver" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#64748b"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#66baff"/>
+      <stop offset="100%" stop-color="#0a84e6"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="200" height="200" rx="44" fill="#020a1c"/>
+
+  <g transform="translate(70 100)">
+    <g fill="url(#silver)">
+      <rect x="-8" y="-72" width="16" height="20" rx="3"/>
+      <rect x="-8" y="-72" width="16" height="20" rx="3" transform="rotate(45)"/>
+      <rect x="-8" y="-72" width="16" height="20" rx="3" transform="rotate(90)"/>
+      <rect x="-8" y="-72" width="16" height="20" rx="3" transform="rotate(135)"/>
+      <rect x="-8" y="-72" width="16" height="20" rx="3" transform="rotate(180)"/>
+      <rect x="-8" y="-72" width="16" height="20" rx="3" transform="rotate(225)"/>
+      <rect x="-8" y="-72" width="16" height="20" rx="3" transform="rotate(270)"/>
+      <rect x="-8" y="-72" width="16" height="20" rx="3" transform="rotate(315)"/>
+    </g>
+    <path
+      fill="url(#silver)"
+      fill-rule="evenodd"
+      d="M -56,0 A 56 56 0 1 0 56,0 A 56 56 0 1 0 -56,0 Z M -22,0 A 22 22 0 1 1 22,0 A 22 22 0 1 1 -22,0 Z"
+    />
+  </g>
+
+  <g transform="translate(125 100)" stroke="url(#blue)" stroke-width="14" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M -32,-70 L -32,70 L 18,15 L 68,70 L 68,-70"/>
+  </g>
+  <g transform="translate(125 100)" fill="url(#blue)">
+    <circle cx="-32" cy="-70" r="11"/>
+    <circle cx="68" cy="-70" r="11"/>
+    <circle cx="-32" cy="70" r="11"/>
+    <circle cx="68" cy="70" r="11"/>
+  </g>
+</svg>
