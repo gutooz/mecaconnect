@@ -1,0 +1,4 @@
+# Lista de placas para consulta em lote
+# Linhas começando com # são ignoradas
+# Uma placa por linha — formatos aceitos: ABC1234 ou ABC1D23
+ABC1D23

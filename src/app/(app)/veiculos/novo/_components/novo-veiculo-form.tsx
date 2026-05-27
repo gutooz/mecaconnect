@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Camera, X, Loader2 } from "lucide-react";
+import { ArrowLeft, Camera, X, Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import { createVehicle } from "@/lib/actions";
 // A busca de dados (customers) vem como prop do Server Component pai.
 
 const FUEL_TYPES = ["Gasolina", "Etanol", "Flex", "Diesel", "GNV", "Elétrico", "Híbrido"];
+const PLACA_REGEX = /^[A-Z]{3}[0-9]{4}$|^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
 
 interface Customer { id: string; full_name: string }
 
@@ -25,20 +26,87 @@ interface Props {
   customers: Customer[];
 }
 
+interface DadosVeiculo {
+  brand: string;
+  model: string;
+  year: string;
+  color: string;
+  fuel_type: string;
+  chassis: string;
+}
+
 export function NovoVeiculoForm({ customers }: Props) {
   const router = useRouter();
   const params = useSearchParams();
   const preselectedCustomer = params.get("customer");
+
   const [loading, setLoading] = React.useState(false);
   const [photos, setPhotos] = React.useState<string[]>([]);
   const [uploadingPhoto, setUploadingPhoto] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Campos que podem ser preenchidos automaticamente pela consulta de placa
+  const [plate, setPlate] = React.useState("");
+  const [lookupLoading, setLookupLoading] = React.useState(false);
+  const [brand, setBrand] = React.useState("");
+  const [model, setModel] = React.useState("");
+  const [year, setYear] = React.useState("");
+  const [color, setColor] = React.useState("");
+  const [fuelType, setFuelType] = React.useState("");
+  const [chassis, setChassis] = React.useState("");
+
+  async function consultarPlaca(placa: string) {
+    const cleaned = placa.replace(/[^A-Z0-9]/g, "");
+    if (!PLACA_REGEX.test(cleaned)) return;
+
+    setLookupLoading(true);
+    try {
+      const res = await fetch(`/api/consultar-placa?placa=${cleaned}`);
+
+      if (res.status === 404) {
+        toast.info("Placa não encontrada na base de dados.");
+        return;
+      }
+      if (!res.ok) {
+        toast.warning("Não foi possível consultar a placa. Preencha os dados manualmente.");
+        return;
+      }
+
+      const dados: DadosVeiculo = await res.json();
+
+      let preenchidos = 0;
+      if (dados.brand) { setBrand(dados.brand); preenchidos++; }
+      if (dados.model) { setModel(dados.model); preenchidos++; }
+      if (dados.year) { setYear(String(dados.year)); preenchidos++; }
+      if (dados.color) { setColor(dados.color); preenchidos++; }
+      if (dados.fuel_type) { setFuelType(dados.fuel_type); preenchidos++; }
+      if (dados.chassis) { setChassis(dados.chassis); preenchidos++; }
+
+      if (preenchidos > 0) {
+        toast.success("Dados do veículo preenchidos automaticamente!");
+      }
+    } catch {
+      toast.warning("Erro ao consultar placa. Preencha os dados manualmente.");
+    } finally {
+      setLookupLoading(false);
+    }
+  }
+
+  function handlePlateBlur() {
+    consultarPlaca(plate);
+  }
+
+  function handlePlateKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      consultarPlaca(plate);
+    }
+  }
+
   async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files || !files.length) return;
     setUploadingPhoto(true);
-    // O cliente browser é usado APENAS para upload binário de arquivo
     const supabase = createClient();
     const urls: string[] = [];
 
@@ -72,16 +140,16 @@ export function NovoVeiculoForm({ customers }: Props) {
     try {
       const vehicle = await createVehicle({
         customer_id: String(fd.get("customer_id")),
-        brand: String(fd.get("brand")),
-        model: String(fd.get("model")),
-        year: Number(fd.get("year")) || undefined,
-        plate: String(fd.get("plate")),
-        color: (fd.get("color") as string) || undefined,
+        brand,
+        model,
+        year: Number(year) || undefined,
+        plate,
+        color: color || (fd.get("color") as string) || undefined,
         current_km: Number(fd.get("current_km")) || undefined,
-        chassis: (fd.get("chassis") as string) || undefined,
+        chassis: chassis || undefined,
         renavam: (fd.get("renavam") as string) || undefined,
         engine: (fd.get("engine") as string) || undefined,
-        fuel_type: (fd.get("fuel_type") as string) || undefined,
+        fuel_type: fuelType || undefined,
         last_oil_change: (fd.get("last_oil_change") as string) || undefined,
         next_revision_at: (fd.get("next_revision_at") as string) || undefined,
         tires: (fd.get("tires") as string) || undefined,
@@ -129,46 +197,115 @@ export function NovoVeiculoForm({ customers }: Props) {
         <Card className="p-6 space-y-4">
           <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Identificação</h2>
           <div className="grid gap-4 sm:grid-cols-2">
+            {/* Placa com busca automática */}
             <div className="space-y-2">
               <Label htmlFor="plate">Placa *</Label>
-              <Input id="plate" name="plate" required maxLength={8} placeholder="ABC1D23" style={{ textTransform: "uppercase" }} />
+              <div className="relative">
+                <Input
+                  id="plate"
+                  name="plate"
+                  required
+                  maxLength={8}
+                  placeholder="ABC1D23"
+                  className="uppercase pr-10"
+                  value={plate}
+                  onChange={(e) => setPlate(e.target.value.toUpperCase())}
+                  onBlur={handlePlateBlur}
+                  onKeyDown={handlePlateKeyDown}
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  {lookupLoading
+                    ? <Loader2 className="size-4 animate-spin" />
+                    : <Search className="size-4" />
+                  }
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Os dados serão buscados automaticamente ao sair do campo.
+              </p>
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="renavam">RENAVAM</Label>
               <Input id="renavam" name="renavam" maxLength={11} placeholder="00000000000" />
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="chassis">Chassi</Label>
-              <Input id="chassis" name="chassis" maxLength={17} placeholder="9BWZZZ377VT004251" />
+              <Input
+                id="chassis"
+                name="chassis"
+                maxLength={17}
+                placeholder="9BWZZZ377VT004251"
+                value={chassis}
+                onChange={(e) => setChassis(e.target.value)}
+              />
             </div>
           </div>
         </Card>
 
         {/* Dados do veículo */}
         <Card className="p-6 space-y-4">
-          <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Dados do veículo</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Dados do veículo</h2>
+            {lookupLoading && (
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <Loader2 className="size-3 animate-spin" /> Buscando dados…
+              </span>
+            )}
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="brand">Marca *</Label>
-              <Input id="brand" name="brand" required placeholder="Volkswagen" />
+              <Input
+                id="brand"
+                name="brand"
+                required
+                placeholder="Volkswagen"
+                value={brand}
+                onChange={(e) => setBrand(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="model">Modelo *</Label>
-              <Input id="model" name="model" required placeholder="Gol" />
+              <Input
+                id="model"
+                name="model"
+                required
+                placeholder="Gol"
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="year">Ano</Label>
-              <Input id="year" name="year" type="number" min={1900} max={2100} placeholder="2024" />
+              <Input
+                id="year"
+                name="year"
+                type="number"
+                min={1900}
+                max={2100}
+                placeholder="2024"
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="color">Cor</Label>
-              <Input id="color" name="color" placeholder="Prata" />
+              <Input
+                id="color"
+                name="color"
+                placeholder="Prata"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="fuel_type">Tipo de combustível</Label>
               <select
                 id="fuel_type"
                 name="fuel_type"
+                value={fuelType}
+                onChange={(e) => setFuelType(e.target.value)}
                 className="flex h-11 w-full rounded-lg border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="">Selecione…</option>
