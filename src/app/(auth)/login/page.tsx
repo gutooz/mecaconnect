@@ -104,7 +104,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <React.Suspense>
+    <React.Suspense fallback={null}>
       <LoginForm />
     </React.Suspense>
   );
