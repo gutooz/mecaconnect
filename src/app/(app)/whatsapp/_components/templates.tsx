@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { createClient } from "@/lib/supabase/client";
+import { updateWhatsappTemplate } from "@/lib/actions";
 import type { WhatsappEventType } from "@/types/database";
 
 const EVENT_LABELS: Record<WhatsappEventType, string> = {
@@ -31,14 +31,15 @@ export function WhatsappTemplates({ templates }: { templates: any[] }) {
 
   async function save(t: any) {
     setSavingId(t.id);
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("whatsapp_templates")
-      .update({ message_template: editing[t.event_type] })
-      .eq("id", t.id);
-    if (error) toast.error(error.message);
-    else toast.success("Template salvo!");
-    setSavingId(null);
+    try {
+      // Usa Server Action — não expõe Supabase no browser
+      await updateWhatsappTemplate(t.id, editing[t.event_type]);
+      toast.success("Template salvo!");
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setSavingId(null);
+    }
   }
 
   return (

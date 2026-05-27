@@ -146,9 +146,14 @@ export async function createVehicle(input: {
   color?: string;
   current_km?: number;
   chassis?: string;
+  renavam?: string;
   engine?: string;
   fuel_type?: string;
+  last_oil_change?: string;
+  next_revision_at?: string;
+  tires?: string;
   notes?: string;
+  photos?: string[];
 }) {
   const { organization } = await getSessionData();
   const supabase = await createClient();
@@ -180,6 +185,7 @@ export async function createServiceOrder(input: {
   current_km?: number;
   fuel_level?: string;
   expected_delivery_at?: string;
+  assigned_mechanic_id?: string;
 }) {
   const { organization, user } = await getSessionData();
   const supabase = await createClient();
@@ -458,6 +464,38 @@ export async function markTransactionPaid(id: string) {
     .eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/financeiro");
+}
+
+// ============== CONFIGURAÇÕES ==============
+
+export async function updateOrganization(patch: {
+  name?: string;
+  cnpj?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+}) {
+  const { organization } = await getSessionData();
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("organizations")
+    .update(patch)
+    .eq("id", organization.id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/configuracoes/oficina");
+}
+
+export async function updateWhatsappTemplate(id: string, message_template: string) {
+  const { organization } = await getSessionData();
+  const supabase = await createClient();
+  // Verifica que o template pertence à organização do usuário antes de atualizar
+  const { error } = await supabase
+    .from("whatsapp_templates")
+    .update({ message_template })
+    .eq("id", id)
+    .eq("organization_id", organization.id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/whatsapp");
 }
 
 // ============== WHATSAPP ==============

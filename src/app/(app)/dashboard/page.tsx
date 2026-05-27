@@ -25,6 +25,8 @@ export default async function DashboardPage() {
   const orgId = organization.id;
 
   const now = new Date();
+  const hour = now.getHours();
+  const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const startOf7Days = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).toISOString();
@@ -103,7 +105,7 @@ export default async function DashboardPage() {
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-            Bom dia, {profile.full_name.split(" ")[0]} 👋
+            {greeting}, {profile.full_name.split(" ")[0]} 👋
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             Aqui está o resumo da {organization.name} hoje.

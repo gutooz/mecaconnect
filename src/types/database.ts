@@ -112,8 +112,12 @@ export type Vehicle = {
   color: string | null;
   current_km: number;
   chassis: string | null;
+  renavam: string | null;
   engine: string | null;
   fuel_type: string | null;
+  last_oil_change: string | null;   // date ISO (YYYY-MM-DD)
+  next_revision_at: string | null;  // date ISO (YYYY-MM-DD)
+  tires: string | null;
   notes: string | null;
   photos: string[];
   created_at: string;

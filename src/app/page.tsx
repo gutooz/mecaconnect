@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   CheckCircle2,
@@ -132,11 +133,26 @@ export default function HomePage() {
             </p>
           </div>
 
+          {/* CEOs */}
           <div className="relative flex justify-center lg:justify-end">
+            {/* Glow ambiente azul-ciano por trás dos CEOs */}
             <div className="absolute inset-0 -z-10 blur-3xl opacity-40">
-              <div className="size-full rounded-full bg-gradient-to-br from-primary/40 via-brand-400/20 to-transparent" />
+              <div className="size-full rounded-full bg-gradient-to-b from-primary/50 via-brand-400/20 to-transparent" />
             </div>
-            <Logo size="2xl" priority className="drop-shadow-[0_0_60px_rgba(30,156,255,0.35)]" />
+
+            {/* Imagem sem fundo — flutua direto sobre o site */}
+            <div className="relative max-w-md w-full">
+              <Image
+                src="/ceos-nobg.png"
+                alt="Gustavo e Gabriel — Co-CEOs do MecaConnect"
+                width={480}
+                height={420}
+                className="w-full object-contain drop-shadow-[0_0_40px_rgba(30,156,255,0.20)]"
+                priority
+              />
+              {/* Fade sutil na base para ancorar na página */}
+              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+            </div>
           </div>
         </div>
       </section>
