@@ -17,8 +17,8 @@ async function buscarPagina(url: string): Promise<{ status: number; html: string
 
   try {
     const response = await page.goto(url, {
-      waitUntil: "domcontentloaded",
-      timeout: 20000,
+      waitUntil: "networkidle",
+      timeout: 30000,
     });
 
     const status = response?.status() ?? 200;
