@@ -1,4 +1,9 @@
+import path from "path";
 import { chromium, type Browser } from "playwright";
+
+// Aponta para o path onde scripts/install-playwright.cjs instalou o Chromium.
+// Precisa ser definido antes de chromium.launch() ser chamado.
+process.env.PLAYWRIGHT_BROWSERS_PATH = path.join(process.cwd(), ".playwright-browsers");
 
 let browser: Browser | null = null;
 
