@@ -2,8 +2,6 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { sendText } from "@/lib/evolution";
 
-// POST /api/whatsapp/process-queue
-// Processa a fila de mensagens pendentes — pode ser chamado por cron Vercel
 export async function POST(request: NextRequest) {
   const auth = request.headers.get("authorization");
   if (auth !== `Bearer ${process.env.CRON_SECRET ?? "dev"}`) {

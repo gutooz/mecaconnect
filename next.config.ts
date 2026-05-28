@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react", "recharts"],
   },
+  // Playwright tem binários nativos — não pode ser bundlado pelo webpack
+  serverExternalPackages: ["playwright", "playwright-core"],
 };
 
 export default nextConfig;
