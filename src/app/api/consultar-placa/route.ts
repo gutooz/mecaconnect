@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as cheerio from "cheerio";
-import { getBrowser } from "@/lib/browser";
 
 const KEPLACA_URL = "https://www.keplaca.com/placa/";
 
@@ -9,28 +8,21 @@ const CAMPOS_DESEJADOS = new Set([
   "Chassi", "UF", "Município", "Cor",
 ]);
 
-// Usa Playwright (Chromium real) para bypass do Cloudflare.
-// O TLS fingerprint e os headers são idênticos a um Chrome legítimo.
 async function buscarPagina(url: string): Promise<{ status: number; html: string }> {
-  const browser = await getBrowser();
-  const page = await browser.newPage();
+  const apiKey = process.env.SCRAPER_API_KEY;
+  if (!apiKey) throw new Error("SCRAPER_API_KEY não configurada");
 
-  try {
-    const response = await page.goto(url, {
-      waitUntil: "networkidle",
-      timeout: 30000,
-    });
+  const scraperUrl =
+    `https://api.scraperapi.com?api_key=${apiKey}` +
+    `&url=${encodeURIComponent(url)}&render=true`;
 
-    const status = response?.status() ?? 200;
-    const html = await page.content();
-    return { status, html };
-  } finally {
-    await page.close();
-  }
+  const response = await fetch(scraperUrl, {
+    signal: AbortSignal.timeout(30000),
+  });
+
+  return { status: response.status, html: await response.text() };
 }
 
-// HTML do keplaca.com: <table class="fipeTablePriceDetail">
-//   <tr><td><b>Marca:</b></td><td>HONDA</td></tr> ...
 function parsearHTML(html: string): Record<string, string> {
   const $ = cheerio.load(html);
   const dados: Record<string, string> = {};
