@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as cheerio from "cheerio";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
+import { getBrowser } from "@/lib/browser";
 
-const execFileAsync = promisify(execFile);
 const KEPLACA_URL = "https://www.keplaca.com/placa/";
 
 const CAMPOS_DESEJADOS = new Set([
@@ -11,28 +9,24 @@ const CAMPOS_DESEJADOS = new Set([
   "Chassi", "UF", "Município", "Cor",
 ]);
 
-// Cloudflare bloqueia Node.js fetch pelo TLS fingerprint, mas permite curl.
-// Usamos curl como subprocess — disponível no Windows 10+, Linux e macOS.
+// Usa Playwright (Chromium real) para bypass do Cloudflare.
+// O TLS fingerprint e os headers são idênticos a um Chrome legítimo.
 async function buscarPagina(url: string): Promise<{ status: number; html: string }> {
-  const { stdout } = await execFileAsync(
-    "curl",
-    [
-      "-s",
-      "--max-time", "12",
-      "-L",                                             // segue redirecionamentos
-      "-w", "\n__STATUS__%{http_code}",                // imprime status no final
-      "-H", "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-      "-H", "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-      "-H", "Accept-Language: pt-BR,pt;q=0.9,en-US;q=0.8",
-      url,
-    ],
-    { maxBuffer: 6 * 1024 * 1024 }
-  );
+  const browser = await getBrowser();
+  const page = await browser.newPage();
 
-  const match = stdout.match(/\n__STATUS__(\d+)$/);
-  const status = match ? parseInt(match[1], 10) : 200;
-  const html = match ? stdout.slice(0, stdout.lastIndexOf("\n__STATUS__")) : stdout;
-  return { status, html };
+  try {
+    const response = await page.goto(url, {
+      waitUntil: "domcontentloaded",
+      timeout: 20000,
+    });
+
+    const status = response?.status() ?? 200;
+    const html = await page.content();
+    return { status, html };
+  } finally {
+    await page.close();
+  }
 }
 
 // HTML do keplaca.com: <table class="fipeTablePriceDetail">

@@ -1,7 +1,0 @@
-{
-  "framework": "nextjs",
-  "buildCommand": "npm run build",
-  "crons": [
-    { "path": "/api/whatsapp/process-queue", "schedule": "*/2 * * * *" }
-  ]
-}
