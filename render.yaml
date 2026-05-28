@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: mecaconnect
+    env: node
+    plan: starter
+    buildCommand: npm install && sudo npx playwright install chromium --with-deps && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: /opt/render/project/.playwright
