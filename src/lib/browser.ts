@@ -4,7 +4,7 @@ import { chromium } from "playwright-extra";
 import type { Browser } from "playwright";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-chromium.use(require("playwright-extra-plugin-stealth")());
+chromium.use(require("puppeteer-extra-plugin-stealth")());
 
 // Playwright inicializa o registro de browsers no import, antes de qualquer
 // atribuição ao process.env. Por isso usamos executablePath para apontar
