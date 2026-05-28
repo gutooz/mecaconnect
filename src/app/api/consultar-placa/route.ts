@@ -17,7 +17,7 @@ async function buscarPagina(url: string): Promise<{ status: number; html: string
     `&url=${encodeURIComponent(url)}&render=true`;
 
   const response = await fetch(scraperUrl, {
-    signal: AbortSignal.timeout(30000),
+    signal: AbortSignal.timeout(70000),
   });
 
   return { status: response.status, html: await response.text() };
