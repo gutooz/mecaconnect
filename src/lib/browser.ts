@@ -1,11 +1,10 @@
 import { existsSync, readdirSync } from "fs";
 import path from "path";
 import { chromium } from "playwright-extra";
-import StealthPlugin from "playwright-extra-plugin-stealth";
 import type { Browser } from "playwright";
 
-// Stealth patches 17+ APIs que o Cloudflare usa para detectar headless browsers
-chromium.use(StealthPlugin());
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+chromium.use(require("playwright-extra-plugin-stealth")());
 
 // Playwright inicializa o registro de browsers no import, antes de qualquer
 // atribuição ao process.env. Por isso usamos executablePath para apontar
